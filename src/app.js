@@ -95,7 +95,8 @@ const app= express();
 
 
 
-app.get("/admin/:userID",adminAuth,(req,res,next)=>{
+app.get("/admin/:userID",adminAuth)
+app.get("/admin/:userid",(req,res,next)=>{
     res.send("Hi Authorized user")
 })
 
@@ -107,6 +108,37 @@ app.get("/user/login",(req,res)=>{
     res.send("can be used without authentication")
 })
 
+app.use("/",(err,req,res,next)=>{
+    if(err){
+        console.log(err);
+        res.status(500).send("Something went wrong");
+    }
+})
+
+
+app.get("/getuserdata",(req,res)=>{
+
+
+
+    throw new Error("error message");
+    res.send("user data sent")
+})
+app.use("/",(err,req,res,next)=>{
+    if(err){
+        console.log(err);
+        res.status(500).send("Something went wrong");
+    }
+})
+
+
+app.get("/admindata",(req,res,next)=>{
+    try{
+        throw new Error("Database Error");
+    }
+    catch(err){
+        res.status(500).send("Somehting went wrong! ")
+    }
+})
 
 
 app.listen(7777,()=>{
