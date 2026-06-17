@@ -1,5 +1,8 @@
 const express = require('express');
+require("./config/database")
+const {connectDB} = require("./config/database")
 const { adminAuth,userAuth }= require('./middleware/auth');
+const User = require("./model/user");
 const app= express();
 // app.use("/user",(req,res)=>{
 //     res.send("HAHAHAHAHAH")
@@ -95,52 +98,82 @@ const app= express();
 
 
 
-app.get("/admin/:userID",adminAuth)
-app.get("/admin/:userid",(req,res,next)=>{
-    res.send("Hi Authorized user")
-})
+// app.get("/admin/:userID",adminAuth)
+// app.get("/admin/:userid",(req,res,next)=>{
+//     res.send("Hi Authorized user")
+// })
 
-app.get("/user/data",userAuth,(req,res)=>{
-    res.send("verified user to get data");
-})
+// app.get("/user/data",userAuth,(req,res)=>{
+//     res.send("verified user to get data");
+// })
 
-app.get("/user/login",(req,res)=>{
-    res.send("can be used without authentication")
-})
+// app.get("/user/login",(req,res)=>{
+//     res.send("can be used without authentication")
+// })
 
-app.use("/",(err,req,res,next)=>{
-    if(err){
-        console.log(err);
-        res.status(500).send("Something went wrong");
+// app.use("/",(err,req,res,next)=>{
+//     if(err){
+//         console.log(err);
+//         res.status(500).send("Something went wrong");
+//     }
+// })
+
+
+// app.get("/getuserdata",(req,res)=>{
+
+
+
+//     throw new Error("error message");
+//     res.send("user data sent")
+// })
+// app.use("/",(err,req,res,next)=>{
+//     if(err){
+//         console.log(err);
+//         res.status(500).send("Something went wrong");
+//     }
+// })
+
+
+// app.get("/admindata",(req,res,next)=>{
+//     try{
+//         throw new Error("Database Error");
+//     }
+//     catch(err){
+//         res.status(500).send("Somehting went wrong! ")
+//     }
+// })
+
+app.post("/signup",async(req,res) =>{
+    
+    const userdata={
+        firstName:"Suraj",
+        lastName:"Duppally",
+        emailId:"surajduppally27@gmail.com",
+        password:"babu@123",
+        age:21
     }
-})
+    const user = new User(userdata);
 
-
-app.get("/getuserdata",(req,res)=>{
-
-
-
-    throw new Error("error message");
-    res.send("user data sent")
-})
-app.use("/",(err,req,res,next)=>{
-    if(err){
-        console.log(err);
-        res.status(500).send("Something went wrong");
-    }
-})
-
-
-app.get("/admindata",(req,res,next)=>{
     try{
-        throw new Error("Database Error");
+        await user.save();
+        res.send("user data saved successfully")
     }
     catch(err){
-        res.status(500).send("Somehting went wrong! ")
+        res.status(400).send("Bad Request"+err.message);
     }
 })
 
 
-app.listen(7777,()=>{
-    console.log('server is listening on port 7777......')
+
+connectDB()
+    .then(() =>{
+        console.log("Database connection established");
+        app.listen(7777,()=>{
+        console.log('server is listening on port 7777......')
 })
+
+    })
+    .catch((err) =>{
+        console.error("Database cannot be connected")
+    })
+
