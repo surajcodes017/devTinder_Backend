@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const {Schema} = mongoose;
+const validator = require("validator");
 
 const userSchema = new Schema({
     firstName:{
@@ -21,7 +22,13 @@ const userSchema = new Schema({
         unique:true,
         lowercase: true,
         trim: true,
-    },
+
+        validate(value){
+            if(!validator.isEmail(value)){
+            throw new Error("Invalid Email address :"+value)
+        }
+    }
+},
     password:{
         type:String,
         required: true,
@@ -34,6 +41,17 @@ const userSchema = new Schema({
         validate(value){
             return ["male","female","other"].includes(value);
         }
+    },
+    photoUrl:{
+        type:String,
+        
+        default: "https://img.magnific.com/premium-vector/vector-flat-illustration-black-color-suitable-social-media-profiles-icons-screensavers-as-template-avatar-user-profile-person-icon-profile-picturex9_719432-1588.jpg?semt=ais_hybrid&w=740&q=80",
+        validate(value){
+            if(!validator.isURL(value)){
+                throw new Error("Invalid Photo URL "+value);
+            }
+        }
+
     },
     age:{
         type:Number,

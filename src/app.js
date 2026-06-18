@@ -19,7 +19,7 @@ app.post("/signup",async(req,res) =>{
 
     try{
         await user.save();
-        res.send("user data saved successfully")
+        res.send("user data saved successfully");
     }
     catch(err){
         res.status(400).send("Bad Request "+err.message);
@@ -106,12 +106,29 @@ app.delete("/user",async(req,res)=>{
 })
 
 
-app.patch("/user",async(req,res)=>{
+app.patch("/user/:userID",async(req,res)=>{
+    const userID = req.params?.userID;
 
     try{
-        const {id,...data} = req.body;
+        
+        const {...data} = req.body;
+        const ALLOWED_UPDATES = [
+            "firstName",
+            "lastName",
+            "age",
+            "gender",
+            "bio"
+        ]
+        const isUpdateAllowed = Object.keys(data).every(
+            (k) =>{
+                return ALLOWED_UPDATES.includes(k)
+            }
+        )
+        if(!isUpdateAllowed){
+            throw new Error("Update not at all allowed");
+        }
         const users = await User.findByIdAndUpdate(
-            id,
+            userID,
             data,
             {returnDocument:"after",
             runValidators:true,
@@ -127,7 +144,7 @@ app.patch("/user",async(req,res)=>{
 
     }
     catch(err){
-        res.status(400).send("something went wrong"+err.message);
+        res.status(400).send("something went wrong: "+err.message);
     }
 
 })
