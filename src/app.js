@@ -3,6 +3,9 @@ require("./config/database")
 const {connectDB} = require("./config/database")
 const { adminAuth,userAuth }= require('./middleware/auth');
 const User = require("./model/user");
+const {validateSignUpData,hashPassword} = require("./helpers/validation")
+const validator = require("validator");
+const bcrypt = require("bcrypt");
 const app= express();
 
 app.use(express.json());
@@ -11,13 +14,20 @@ app.use(express.json());
 
 app.post("/signup",async(req,res) =>{
 
+      try{
 
+          validateSignUpData(req.body);
+
+          const passwordHash= await hashPassword(req.body.password);
     
     
     // This is creating a new instance of usermodel 
-    const user = new User(req.body);
+    const user = new User({
+        ...req.body,
+        password:passwordHash,
+    });
 
-    try{
+    
         await user.save();
         res.send("user data saved successfully");
     }
@@ -25,7 +35,32 @@ app.post("/signup",async(req,res) =>{
         res.status(400).send("Bad Request "+err.message);
     }
 })
+app.post("/login",async(req,res)=>{
 
+
+    try{
+        const {emailId,password} = req.body;
+        if(!validator.isEmail(emailId)){
+            throw new Error("Invalid Credentials");
+        }
+        const user = await User.findOne({emailId:emailId});
+        if(!user){
+            throw new Error("Invalid Credentials");
+        }
+
+        const isPasswordvalid = await bcrypt.compare(password,user.password);
+        if(isPasswordvalid){
+            res.send("User Logged In succesfully");
+        }
+        else{
+            throw new Error("Password Incorrect!")
+        }
+
+    }
+     catch(err){
+        res.status(400).send("Bad Request "+err.message);
+    }
+})
 
 app.get("/user",async(req,res,next)=>{
     // console.log(req.body);
