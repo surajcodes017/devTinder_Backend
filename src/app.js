@@ -22,7 +22,7 @@ app.post("/signup",async(req,res) =>{
         res.send("user data saved successfully")
     }
     catch(err){
-        res.status(400).send("Bad Request"+err.message);
+        res.status(400).send("Bad Request "+err.message);
     }
 })
 
@@ -109,10 +109,13 @@ app.delete("/user",async(req,res)=>{
 app.patch("/user",async(req,res)=>{
 
     try{
+        const {id,...data} = req.body;
         const users = await User.findByIdAndUpdate(
-            req.body.id,
-            {age:41},
-            {returnDocument:"after"}
+            id,
+            data,
+            {returnDocument:"after",
+            runValidators:true,
+            }
         
         );
         if(!users){
