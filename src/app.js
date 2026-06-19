@@ -6,9 +6,12 @@ const User = require("./model/user");
 const {validateSignUpData,hashPassword} = require("./helpers/validation")
 const validator = require("validator");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt= require("jsonwebtoken")
 const app= express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 
 
@@ -50,6 +53,16 @@ app.post("/login",async(req,res)=>{
 
         const isPasswordvalid = await bcrypt.compare(password,user.password);
         if(isPasswordvalid){
+
+            const token = jwt.sign(
+                {userId: user._id},
+                "DevTinder@18"
+                );
+            
+            res.cookie("token",token);
+            
+
+
             res.send("User Logged In succesfully");
         }
         else{
@@ -62,9 +75,29 @@ app.post("/login",async(req,res)=>{
     }
 })
 
+app.get("/profile",async(req,res)=>{
+    try{
+        const cookie = req.cookies;
+       
+        const {token} = cookie;
+
+        const decodedMessage = await jwt.verify(token, "DevTinder@18")
+
+        
+        const {userId} = decodedMessage;
+        console.log("Logged In User is : "+ userId);
+        const user =  await User.findById(userId);
+
+        res.send(user);
+
+      
+    }
+    catch(err){
+         res.status(400).send("Bad Request "+err.message);
+    }
+})
+
 app.get("/user",async(req,res,next)=>{
-    // console.log(req.body);
-    // console.log(req.headers);
     
     
     const userEmailId=req.body.emailId;
