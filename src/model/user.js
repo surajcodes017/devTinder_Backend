@@ -77,14 +77,14 @@ userSchema.methods.getJWT = async function(){
                     {userId: user._id},
                     "DevTinder@18",
                     {
-                        expiresIn: "10s"
+                        expiresIn: "10m"
                     },
                     );
 
         return token;
 }
 
-userSchema.methods.validatePassoword = async function(passwordInputByUser){
+userSchema.methods.validatePassword = async function(passwordInputByUser){
     const user = this;
 
     const isPasswordvalid = await bcrypt.compare(passwordInputByUser,user.password);
