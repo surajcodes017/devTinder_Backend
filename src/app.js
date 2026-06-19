@@ -1,7 +1,7 @@
 const express = require('express');
 require("./config/database")
 const {connectDB} = require("./config/database")
-const { adminAuth,userAuth }= require('./middleware/auth');
+const { userAuth }= require('./middleware/auth');
 const User = require("./model/user");
 const {validateSignUpData,hashPassword} = require("./helpers/validation")
 const validator = require("validator");
@@ -51,13 +51,10 @@ app.post("/login",async(req,res)=>{
             throw new Error("Invalid Credentials");
         }
 
-        const isPasswordvalid = await bcrypt.compare(password,user.password);
+        const isPasswordvalid = await user.validatePassword(password);
         if(isPasswordvalid){
 
-            const token = jwt.sign(
-                {userId: user._id},
-                "DevTinder@18"
-                );
+            const token = await user.getJWT;
             
             res.cookie("token",token);
             
@@ -66,7 +63,7 @@ app.post("/login",async(req,res)=>{
             res.send("User Logged In succesfully");
         }
         else{
-            throw new Error("Password Incorrect!")
+            throw new Error("Incorrect Credentials!")
         }
 
     }
@@ -75,18 +72,12 @@ app.post("/login",async(req,res)=>{
     }
 })
 
-app.get("/profile",async(req,res)=>{
+app.get("/profile",userAuth,async(req,res)=>{
     try{
-        const cookie = req.cookies;
-       
-        const {token} = cookie;
-
-        const decodedMessage = await jwt.verify(token, "DevTinder@18")
-
         
-        const {userId} = decodedMessage;
-        console.log("Logged In User is : "+ userId);
-        const user =  await User.findById(userId);
+       
+      
+        const user =  req.user;
 
         res.send(user);
 
@@ -95,6 +86,17 @@ app.get("/profile",async(req,res)=>{
     catch(err){
          res.status(400).send("Bad Request "+err.message);
     }
+})
+app.post("/sendConnectionRequest",userAuth,async(req,res)=>{
+
+    try{
+        const user=req.user;
+        res.send(user.firstName+ " has sent the connection request! ");
+    }
+    catch(err){
+        res.status(400).send("Bad Request "+err.message);
+    }
+
 })
 
 app.get("/user",async(req,res,next)=>{
