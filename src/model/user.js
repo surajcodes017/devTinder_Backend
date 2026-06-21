@@ -69,6 +69,10 @@ const userSchema = new Schema({
     timestamps:true,
 })
 
+// userSchema.index({
+//     emailId: 1
+// })
+
 
 userSchema.methods.getJWT = async function(){
     const user = this;

@@ -30,4 +30,17 @@ const hashPassword = async(password) =>{
     return passwordHash;   
 }
 
-module.exports = {validateSignUpData,hashPassword};
+const validateEditProfileData = (req) =>{
+        const data = {...req.body};
+        const allowedEditFeilds = ["firstName","lastName","age","photoUrl","bio"];
+
+        const isUpdateAllowed = Object.keys(data).every(
+            (k) =>{
+                return allowedEditFeilds.includes(k)
+        }
+    )
+   return isUpdateAllowed;
+
+}
+
+module.exports = {validateSignUpData,hashPassword,validateEditProfileData};

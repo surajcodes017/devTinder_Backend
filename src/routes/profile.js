@@ -2,6 +2,7 @@ const express = require("express");
 const profileRouter = express.Router();
 const { userAuth }= require('../middleware/auth');
 const User = require("../model/user");
+const {validateEditProfileData,hashPassword} = require("../helpers/validation");
 
 
 
@@ -22,7 +23,75 @@ profileRouter.get("/profile",userAuth,async(req,res)=>{
     }
 })
 
+profileRouter.get("/profile/view",userAuth,async(req,res)=>{
+        try{
+            const user=req.user;
+            res.send(user);
+        }
+        catch(err){
 
+            res.status(400).send("Bad Request "+err.message);
+    
+
+        }
+
+
+})
+
+profileRouter.patch("/profile/edit",userAuth,async(req,res)=>{
+            try{
+                if(!validateEditProfileData(req)){
+                    throw new Error("Invalid Edit Request");
+                }
+                const loggedInUser = req.user;
+                Object.keys(req.body).forEach(
+                    (key) => loggedInUser[key] = req.body[key]
+                )
+                await loggedInUser.save();
+                console.log(loggedInUser);
+                res.json({
+                        message: `${loggedInUser.firstName} profile Edited successfully`,
+                        data : loggedInUser,
+                })
+            }
+            catch(err){
+                res.status(400).send("Bad Request "+err.message);
+    
+            }
+})
+
+
+
+profileRouter.patch("/profile/password",async(req,res)=>{
+
+    try{
+        const {emailId,newPassword} = req.body;
+        const user = await User.findOne({
+            emailId: emailId
+        });
+        if(!user){
+            throw new Error("No user Exist..Please SignUp");
+        }
+
+        const newHashPassword = await hashPassword(newPassword);
+
+        user.password = newHashPassword;
+        await user.save();
+        res.json({
+            message: "Password changes successfully",
+            data: user
+        })
+
+    }
+
+    catch(err){
+        res.status(400).send("Bad Request "+err.message);
+    }
+
+
+
+
+})
 
 profileRouter.get("/user",async(req,res,next)=>{
     
