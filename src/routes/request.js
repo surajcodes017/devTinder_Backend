@@ -6,14 +6,14 @@ const { find } = require("../model/user");
 const { default: mongoose } = require("mongoose");
 const User = require("../model/user");
 
-requestRouter.post("/sendConnectionRequest", userAuth, async (req, res) => {
-  try {
-    const user = req.user;
-    res.send(user.firstName + " has sent the connection request! ");
-  } catch (err) {
-    res.status(400).send("Bad Request " + err.message);
-  }
-});
+// requestRouter.post("/sendConnectionRequest", userAuth, async (req, res) => {
+//   try {
+//     const user = req.user;
+//     res.send(user.firstName + " has sent the connection request! ");
+//   } catch (err) {
+//     res.status(400).send("Bad Request " + err.message);
+//   }
+// });
 
 requestRouter.post("/request/send/:status/:userId",userAuth, async (req, res) => {
   try {
@@ -86,4 +86,38 @@ requestRouter.post("/request/send/:status/:userId",userAuth, async (req, res) =>
   }
 });
 
+requestRouter.patch("/request/review/:status/:requestId",userAuth,async(req,res) =>{
+
+            const {status,requestId} = req.params;
+            const loggedInUser = req.user;
+
+            const allowedUpdates = ["accepted","rejected"];
+            if(!allowedUpdates.includes(status)){
+                return res.status(400).json({
+                    message: "Invalid status : "+ status,
+                })
+            }
+
+          const connectionRequest = await connectionRequestModel.findOne({
+                _id: requestId,
+                toUserId: loggedInUser._id,
+                status: "interested",
+            })
+            if(!connectionRequest){
+                return res.status(404).json({
+                    message: "Connection request not found"
+                })
+            }
+            connectionRequest.status = status;
+
+            const data = await connectionRequest.save();
+
+            res.json({
+                message: "connection request accepted",
+                data
+            })
+
+
+
+})
 module.exports = requestRouter;

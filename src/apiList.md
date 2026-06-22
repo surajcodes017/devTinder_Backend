@@ -12,10 +12,9 @@
 - PATCH /profile/password
 
 ## connectionRequestRouter
-- POST /request/send/interested/:userId
-- POST /request/send/ignored/:userId
-- POST /request/send/accepted/:userId
-- POST /request/send/rejected/:userId
+- POST /request/send/:status/:userId
+
+- POST /request/review/:status/:userId
 
 ## userRouter
 - GET /connections
