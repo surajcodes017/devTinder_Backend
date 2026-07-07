@@ -7,7 +7,7 @@ const userAuth = async(req,res,next) =>{
     
 
     if(!token){
-        throw new Error("Please Login");
+        return res.status(401).send("Please Login!")
     }
 
     const decodedObj = await jwt.verify(token,"DevTinder@18");
@@ -23,7 +23,9 @@ const userAuth = async(req,res,next) =>{
     }
     catch(err)
     {
-        res.status(400).send("ERROR: " + err.message);
+    return res.status(401).json({
+        message: "Please login again"
+    });
     }
 }
 

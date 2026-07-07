@@ -55,6 +55,8 @@ profileRouter.patch("/profile/edit",userAuth,async(req,res)=>{
                 })
             }
             catch(err){
+                console.log(err);
+                console.log(err.message);
                 res.status(400).send("Bad Request "+err.message);
     
             }

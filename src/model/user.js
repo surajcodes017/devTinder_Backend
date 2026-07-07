@@ -63,7 +63,8 @@ const userSchema = new Schema({
     bio:{
         type: String,
         default:"I am a profeesional cricketer, always its a pride to represnt my country at greater heights",
-    }
+    },
+    skills: [String],
         
 },{
     timestamps:true,

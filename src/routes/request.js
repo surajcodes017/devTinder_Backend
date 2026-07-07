@@ -35,12 +35,7 @@ requestRouter.post("/request/send/:status/:userId",userAuth, async (req, res) =>
         })
       }
 
-    //    if(fromUserId.toString() === toUserId){
-    //     return res.status(400).json({
-    //         message : "Invalid connection request, you cannot send connection request to yourself"
-    //     })
-    // }
-      
+    
     const allowedUpdates = ["ignored", "interested"];
     if (!allowedUpdates.includes(status)) {
       return res.status(400).json({

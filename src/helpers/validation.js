@@ -32,7 +32,7 @@ const hashPassword = async(password) =>{
 
 const validateEditProfileData = (req) =>{
         const data = {...req.body};
-        const allowedEditFeilds = ["firstName","lastName","age","photoUrl","bio"];
+        const allowedEditFeilds = ["firstName","lastName","age","photoUrl","bio","gender","skills"];
 
         const isUpdateAllowed = Object.keys(data).every(
             (k) =>{
