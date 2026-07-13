@@ -5,6 +5,7 @@ const connectionRequestModel = require("../model/connectionRequest");
 const { find } = require("../model/user");
 const { default: mongoose } = require("mongoose");
 const User = require("../model/user");
+const {run} = require("../helpers/sendEmail")
 
 // requestRouter.post("/sendConnectionRequest", userAuth, async (req, res) => {
 //   try {
@@ -71,6 +72,11 @@ requestRouter.post("/request/send/:status/:userId",userAuth, async (req, res) =>
     });
 
     const data = await connectionRequest.save();
+    const emailRes= await run(
+    req.user.firstName,
+     validToUserId.firstName);
+
+    console.log(emailRes);
 
     res.json({
       message: `${req.user.firstName} marked ${validToUserId.firstName} as ${status}`,
