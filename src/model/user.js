@@ -45,6 +45,14 @@ const userSchema = new Schema({
             return ["male","female","other"].includes(value);
         }
     },
+    isPremium:{
+        type: Boolean,
+        default: false,
+    },
+    membershipType:{
+        type: String,
+    },
+    
     photoUrl:{
         type:String,
         
