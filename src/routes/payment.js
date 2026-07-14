@@ -19,7 +19,7 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
     const order = await razorpayInstance.orders.create({
       amount: membershipAmounts[membershipType]*100,
       currency: "INR",
-      receipt: "receipt#22",
+      receipt: `receipt_${req.user._id}_${Date.now()}`,
       notes: {
         firstName,
         lastName,
@@ -59,7 +59,7 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
 paymentRouter.post("/payment/webhook",async(req,res) =>{
 
     try{
-        const webhookSignature = req.headers["X-Razorpay-Signature"];
+        const webhookSignature = req.get("X-Razorpay-Signature");
         const isWebhookValid= validateWebhookSignature(
             JSON.stringify(req.body),
             webhookSignature,
@@ -74,10 +74,25 @@ paymentRouter.post("/payment/webhook",async(req,res) =>{
 
             const paymentDetails = req.body.payload.payment.entity;
 
-            const payment = await Payment.findOne({orderId: paymentDetails.order_id })
+            const payment = await Payment.findOne({orderId: paymentDetails.order_id });
+            if (!payment) {
+                return res.status(404).json({
+                msg: "Payment not found",
+                    });
+                }
+
+
             payment.status=paymentDetails.status;
+            payment.paymentId = paymentDetails.id;
+            payment.method = paymentDetails.method;
+
+
             await payment.save();
             const user = await User.findOne({_id: payment.userId});
+            if (!user) {
+            return res.status(404).json({
+                    msg: "User not found",});
+            }
             user.isPremium=true;
             user.membershipType=payment.notes.membershipType;
 
@@ -99,6 +114,6 @@ paymentRouter.post("/payment/webhook",async(req,res) =>{
         return res.status(500).json({msg: err.message});
     }
 
-})
+    })
 
 module.exports = paymentRouter;
