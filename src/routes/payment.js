@@ -11,46 +11,111 @@ const {validateWebhookSignature} = require('razorpay/dist/utils/razorpay-utils')
 
 
 
+// paymentRouter.post("/payment/create", userAuth, async (req, res) => {
+//   try {
+
+//     const {membershipType} = req.body;
+//     const {firstName,lastName,emailId} = req.user;
+//     const order = await razorpayInstance.orders.create({
+//       amount: membershipAmounts[membershipType]*100,
+//       currency: "INR",
+//       receipt: `receipt_${req.user._id}_${Date.now()}`,
+//       notes: {
+//         firstName,
+//         lastName,
+//         emailId,
+//         membershipType: membershipType,
+//       },
+//     });
+
+//     //save it in the data abse
+//     // send the order id to front end
+
+   
+
+//     const { id, status, amount, currency, receipt, notes } = order;
+
+//     const payment = new Payment({
+//       userId: req.user._id,
+//       orderId: id,
+//       status,
+//       amount,
+//       currency,
+//       receipt,
+//       notes,
+//     });
+
+//     const savedPayment = await payment.save();
+
+//     res.json({...savedPayment.toJSON(),keyId: process.env.RAZORPAY_KEY_ID});
+//   } catch (err) {
+//     res.status(500).json({
+//       message: err.message,
+//     });
+//   }
+// });
 paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   try {
+    console.log("========== PAYMENT START ==========");
 
-    const {membershipType} = req.body;
-    const {firstName,lastName,emailId} = req.user;
+    console.log("1. Request Body:", req.body);
+    console.log("2. User:", req.user);
+
+    const { membershipType } = req.body;
+
+    console.log("3. Membership:", membershipType);
+
+    console.log("4. Amount:", membershipAmounts[membershipType]);
+
+    console.log("5. Razorpay Key:", process.env.RAZORPAY_KEY_ID);
+
+    const { firstName, lastName, emailId } = req.user;
+
+    console.log("6. Creating Razorpay Order...");
+
     const order = await razorpayInstance.orders.create({
-      amount: membershipAmounts[membershipType]*100,
+      amount: membershipAmounts[membershipType] * 100,
       currency: "INR",
       receipt: `receipt_${req.user._id}_${Date.now()}`,
       notes: {
         firstName,
         lastName,
         emailId,
-        membershipType: membershipType,
+        membershipType,
       },
     });
 
-    //save it in the data abse
-    // send the order id to front end
-
-   
-
-    const { id, status, amount, currency, receipt, notes } = order;
+    console.log("7. Order Created:", order);
 
     const payment = new Payment({
       userId: req.user._id,
-      orderId: id,
-      status,
-      amount,
-      currency,
-      receipt,
-      notes,
+      orderId: order.id,
+      status: order.status,
+      amount: order.amount,
+      currency: order.currency,
+      receipt: order.receipt,
+      notes: order.notes,
     });
 
-    const savedPayment = await payment.save();
+    console.log("8. Saving Payment...");
 
-    res.json({...savedPayment.toJSON(),keyId: process.env.RAZORPAY_KEY_ID});
+    await payment.save();
+
+    console.log("9. Payment Saved");
+
+    res.json({
+      ...payment.toJSON(),
+      keyId: process.env.RAZORPAY_KEY_ID,
+    });
+
   } catch (err) {
+    console.error("******** PAYMENT ERROR ********");
+    console.error(err);
+    console.error(err.stack);
+
     res.status(500).json({
       message: err.message,
+      stack: err.stack,
     });
   }
 });
