@@ -19,7 +19,7 @@ const {validateWebhookSignature} = require('razorpay/dist/utils/razorpay-utils')
 //     const order = await razorpayInstance.orders.create({
 //       amount: membershipAmounts[membershipType]*100,
 //       currency: "INR",
-//       receipt: `receipt_${req.user._id}_${Date.now()}`,
+//       receipt: `rcpt_${Date.now()}`,
 //       notes: {
 //         firstName,
 //         lastName,
@@ -76,7 +76,7 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
     const order = await razorpayInstance.orders.create({
       amount: membershipAmounts[membershipType] * 100,
       currency: "INR",
-      receipt: `receipt_${req.user._id}_${Date.now()}`,
+      receipt: `rcpt_${Date.now()}`,
       notes: {
         firstName,
         lastName,
