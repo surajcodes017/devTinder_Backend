@@ -1,7 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 require("./config/database")
 const {connectDB} = require("./config/database");
-require('dotenv').config();
 const cookieParser = require("cookie-parser");
 const app= express();
 const authRouter = require("./routes/auth");
