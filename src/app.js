@@ -10,7 +10,12 @@ const requestRouter = require("./routes/request");
 const userRouter = require('./routes/user');
 const cors = require("cors");
 const paymentRouter = require('./routes/payment');
+const http = require("http");
 require("./helpers/cronJob");
+const  {initializeSocket} = require("./helpers/socket");
+const chatRouter = require('./routes/chat');
+
+
 
 
 
@@ -23,16 +28,24 @@ app.use(cors({
     credentials: true,
 }));
 
+
+
 app.use(express.json());
 app.use(cookieParser());
-
-
 
 app.use("/",authRouter);
 app.use("/",profileRouter);
 app.use("/",requestRouter);
 app.use("/",userRouter);
 app.use("/",paymentRouter);
+app.use("/",chatRouter);
+
+
+const server = http.createServer(app);
+
+initializeSocket(server);
+
+
 
 
 
@@ -41,7 +54,7 @@ app.use("/",paymentRouter);
 connectDB()
     .then(() =>{
         console.log("Database connection established");
-        app.listen(process.env.PORT,()=>{
+        server.listen(process.env.PORT,()=>{
         console.log('server is listening on port 7777......')
 })
 

@@ -4,6 +4,7 @@ const { userAuth } = require("../middleware/auth");
 const { connection } = require("mongoose");
 const connectionRequestModel = require("../model/connectionRequest");
 const User = require("../model/user");
+const onlineUsers = require("../helpers/onlineUsers");
 
 const USER_SAFE_DATA = ["firstName","lastName","photoUrl","age","gender"];
 
@@ -137,5 +138,26 @@ userRouter.get("/feed",userAuth ,async(req,res)=>{
         }
 })
 
+
+userRouter.get("/user/status/:userId", async (req, res) => {
+
+    const user = await User.findById(req.params.userId);
+
+    res.json({
+        isOnline: onlineUsers.has(req.params.userId),
+        lastSeen: user.lastSeen,
+    });
+
+});
+
+
+userRouter.get("/user/:userId", async (req, res) => {
+
+    const user = await User.findById(req.params.userId)
+        .select("firstName lastName photoUrl bio");
+
+    res.json(user);
+
+});
 
 module.exports = userRouter;
